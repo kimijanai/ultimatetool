@@ -46,6 +46,16 @@ function SaltEncodeDecode() {
           onChange={e => setInput(e.target.value)}
         />
       </div>
+      <div className="input-group">
+        <label htmlFor="salt-key">Salt Key</label>
+        <input
+          type="text"
+          id="salt-key"
+          placeholder="Enter salt key"
+          value={salt}
+          onChange={handleSaltChange}
+        />
+      </div>
       <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
         <button onClick={handleEncode} disabled={!input.trim()}>Encode</button>
         <button onClick={handleDecode} disabled={!input.trim()}>Decode</button>
