@@ -1,30 +1,31 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Hashids from 'hashids';
 
-function addSalt(text, salt) {
-  return `${salt}${text}${salt}`;
-}
-
-function removeSalt(text, salt) {
-  if (text.startsWith(salt) && text.endsWith(salt)) {
-    return text.slice(salt.length, -salt.length);
-  }
-  return text;
-}
+const SERVER_SALT = ''; // Set your server salt here if needed
+const ENCODE_LENGTH = 12; // Adjust to match your backend's ENCODE_LENGTH
 
 function SaltEncodeDecode() {
   const [input, setInput] = useState('');
-  const [salt, setSalt] = useState('SALT123');
+  const [salt, setSalt] = useState('');
   const [result, setResult] = useState('');
   const [mode, setMode] = useState('encode');
 
   const handleEncode = () => {
-    setResult(addSalt(input, salt));
+    const num = parseInt(input, 10);
+    if (isNaN(num)) {
+      setResult('Input must be a number for encoding.');
+      return;
+    }
+    const hashids = new Hashids(SERVER_SALT + salt, ENCODE_LENGTH);
+    setResult(hashids.encode(num));
     setMode('encode');
   };
 
   const handleDecode = () => {
-    setResult(removeSalt(input, salt));
+    const hashids = new Hashids(SERVER_SALT + salt, ENCODE_LENGTH);
+    const decoded = hashids.decode(input);
+    setResult(decoded.length > 0 ? decoded[0].toString() : '0');
     setMode('decode');
   };
 
@@ -34,16 +35,16 @@ function SaltEncodeDecode() {
   return (
     <div className="tool-container salt-encode-decode-container">
       <Link to="/" className="back-to-home">Back to Home</Link>
-      <h2>Salt Encode/Decode Utility</h2>
-      <p>Encode and decode text using salt-based algorithms.</p>
+      <h2>Salt Encode/Decode Utility (Hashids)</h2>
+      <p>Encode a number to a salted hash or decode a salted hash to a number using Hashids.</p>
       <div className="input-group">
-        <label htmlFor="salt-input">Input Text</label>
+        <label htmlFor="salt-input">{mode === 'encode' ? 'Input Number' : 'Input Hash'}</label>
         <textarea
           id="salt-input"
           rows={3}
-          placeholder="Enter text to encode/decode"
+          placeholder={mode === 'encode' ? "Enter number to encode" : "Enter hash to decode"}
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={handleInputChange}
         />
       </div>
       <div className="input-group">
