@@ -11,6 +11,7 @@ import SaltEncodeDecode from './components/SaltEncodeDecode';
 import HalfWidthFullWidthConverter from './components/HalfWidthFullWidthConverter';
 import TextDiffChecker from './components/TextDiffChecker';
 import SecurePasswordGenerator from './components/SecurePasswordGenerator';
+import SQLValidator from './components/SQLValidator';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
               <Link to="/half-width-full-width" className="nav-link">Half-Width/Full-Width</Link>
               <Link to="/text-diff-checker" className="nav-link">Text Diff Checker</Link>
               <Link to="/secure-password-generator" className="nav-link">Secure Password Generator</Link>
+              <Link to="/sql-formatter" className="nav-link">SQL Formatter</Link>
             </div>
           </div>
         </nav>
@@ -41,6 +43,7 @@ function App() {
             <Route path="/half-width-full-width" element={<HalfWidthFullWidthConverter />} />
             <Route path="/text-diff-checker" element={<TextDiffChecker />} />
             <Route path="/secure-password-generator" element={<SecurePasswordGenerator />} />
+            <Route path="/sql-formatter" element={<SQLValidator />} />
           </Routes>
         </div>
       </div>

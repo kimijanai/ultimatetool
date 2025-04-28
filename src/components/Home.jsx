@@ -38,6 +38,11 @@ function Home() {
       id: 'secure-password-generator',
       title: 'Secure Password Generator',
       description: 'Create strong, customizable passwords with options for length, complexity, and character types.'
+    },
+    {
+      id: 'sql-formatter',
+      title: 'SQL Query Validator & Formatter',
+      description: 'Format, minify, and validate your SQL queries with ease.'
     }
   ];
 
