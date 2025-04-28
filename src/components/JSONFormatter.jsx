@@ -341,7 +341,7 @@ function JSONFormatter() {
     <div className="tool-container json-formatter-container">
       <Link to="/" className="back-to-home">Back to Home</Link>
       <h2>JSON Formatter & Visual Editor</h2>
-      <p>Experience a robust JSON formatting tool with dual-view interface, live parsing, and more.</p>
+      
       
 
       
