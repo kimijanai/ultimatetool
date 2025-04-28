@@ -12,7 +12,8 @@ function RegexValidator() {
     setError('');
     setMatches(null);
     try {
-      const regex = new RegExp(pattern, flags);
+      let flagsWithG = flags.includes('g') ? flags : flags + 'g';
+      const regex = new RegExp(pattern, flagsWithG);
       const result = [...testString.matchAll(regex)];
       setMatches(result.length > 0 ? result : []);
     } catch (e) {
