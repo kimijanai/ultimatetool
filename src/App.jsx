@@ -12,23 +12,25 @@ import HalfWidthFullWidthConverter from './components/HalfWidthFullWidthConverte
 import TextDiffChecker from './components/TextDiffChecker';
 import SecurePasswordGenerator from './components/SecurePasswordGenerator';
 import SQLValidator from './components/SQLValidator';
+import JsonStructureBuilder from './components/JsonStructureBuilder';
 
 function App() {
   return (
     <Router>
       <div className="app-container">
-        <nav className="navbar">
-          <div className="nav-container">
-            <Link to="/" className="nav-logo">DevSupport Toolbox</Link>
-            <div className="nav-links">
-              <Link to="/json-formatter" className="nav-link">JSON Formatter</Link>
-              <Link to="/encoder-decoder" className="nav-link">Encoder/Decoder</Link>
-              <Link to="/regex-validator" className="nav-link">Regex Validator</Link>
-              <Link to="/salt-encode-decode" className="nav-link">Salt Encode/Decode</Link>
-              <Link to="/half-width-full-width" className="nav-link">Half-Width/Full-Width</Link>
-              <Link to="/text-diff-checker" className="nav-link">Text Diff Checker</Link>
-              <Link to="/secure-password-generator" className="nav-link">Secure Password Generator</Link>
-              <Link to="/sql-formatter" className="nav-link">SQL Formatter</Link>
+        <nav className="sidebar">
+          <div className="sidebar-container">
+            <Link to="/" className="sidebar-logo">DevSupport Toolbox</Link>
+            <div className="sidebar-links">
+              <Link to="/json-formatter" className="sidebar-link">JSON Formatter</Link>
+              <Link to="/encoder-decoder" className="sidebar-link">Encoder/Decoder</Link>
+              <Link to="/regex-validator" className="sidebar-link">Regex Validator</Link>
+              <Link to="/salt-encode-decode" className="sidebar-link">Salt Encode/Decode</Link>
+              <Link to="/half-width-full-width" className="sidebar-link">Half-Width/Full-Width</Link>
+              <Link to="/text-diff-checker" className="sidebar-link">Text Diff Checker</Link>
+              <Link to="/secure-password-generator" className="sidebar-link">Secure Password Generator</Link>
+              <Link to="/sql-formatter" className="sidebar-link">SQL Formatter</Link>
+              <Link to="/json-structure-builder" className="sidebar-link">承認フロー作成</Link>
             </div>
           </div>
         </nav>
@@ -44,6 +46,7 @@ function App() {
             <Route path="/text-diff-checker" element={<TextDiffChecker />} />
             <Route path="/secure-password-generator" element={<SecurePasswordGenerator />} />
             <Route path="/sql-formatter" element={<SQLValidator />} />
+            <Route path="/json-structure-builder" element={<JsonStructureBuilder />} />
           </Routes>
         </div>
       </div>

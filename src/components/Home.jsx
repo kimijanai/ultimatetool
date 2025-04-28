@@ -7,22 +7,22 @@ function Home() {
     {
       id: 'json-formatter',
       title: 'JSON Formatter & Visual Editor',
-      description: 'Experience a robust JSON formatting tool inspired by JSONEditorOnline.'
+      description: 'Simple JSON editor'
     },
     {
       id: 'encoder-decoder',
       title: 'Encoder/Decoder Utility',
-      description: 'Inspired by bcrypt-generator.com, this module offers a secure and user-friendly interface for encoding and decoding operations.'
+      description: 'Hash text to b-crypt, quickly create hashed password'
     },
     {
       id: 'regex-validator',
       title: 'Regex Validator & Generator',
-      description: 'Build, test, and validate regular expressions with enhanced functionality.'
+      description: 'Test, and validate regular expressions with enhanced functionality.'
     },
     {
       id: 'salt-encode-decode',
       title: 'Salt Encode/Decode Tool',
-      description: 'Apply or strip cryptographic salt to encoded values to simulate secure password storage or test authentication workflows.'
+      description: 'Check the salted encoding and decoding of text.'
     },
     {
       id: 'half-width-full-width',
@@ -43,6 +43,11 @@ function Home() {
       id: 'sql-formatter',
       title: 'SQL Query Validator & Formatter',
       description: 'Format, minify, and validate your SQL queries with ease.'
+    },
+    {
+      id: 'json-structure-builder',
+      title: '承認フロー作成',
+      description: 'UIで承認フロー作成'
     }
   ];
 
