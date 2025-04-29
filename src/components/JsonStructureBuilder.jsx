@@ -8,6 +8,7 @@ function emptyElement() {
     authenticators: [{
       type: '',
       user_id: '',
+      root_index: '',
       level: 1,
       is_power_approver: false
     }]
@@ -54,6 +55,7 @@ function JsonStructureBuilder() {
     updated[elIdx].authenticators.push({
       type: '',
       user_id: '',
+      root_index: '',
       level: 1,
       is_power_approver: false
     });
@@ -132,113 +134,195 @@ function JsonStructureBuilder() {
       <p style={{ fontSize: '16px', marginBottom: 24, color: '#666' }}>UIで承認フロー作成</p>
       {elements.map((el, elIdx) => (
         <div key={elIdx} style={{ border: '1px solid #ddd', padding: 16, marginBottom: 16, borderRadius: 8, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.05)', backgroundColor: '#f9f9f9' }}>
-          <h3 style={{ color: '#777' }}>Step {elIdx + 1}</h3>
-          <div>
-            <label style={{ fontWeight: 'bold', color: '#555' }}>Form ID: </label>
+          <h3 style={{ color: '#777', marginBottom: '12px' }}>Step {elIdx + 1}</h3>
+          
+          {/* Form ID section */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '6px' }}>Form ID: </label>
             <input
               type="text"
               value={el.form.id}
               onChange={e => handleFormIdChange(elIdx, e.target.value)}
-              style={{ marginBottom: 8, width: 120, padding: 4, borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+              style={{ width: '100%', maxWidth: '300px', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
             />
           </div>
-          <div>
-            <strong style={{ color: '#555' }}>Documents:</strong>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 4, maxWidth: '100%' }}>
+          
+          {/* Documents section */}
+          <div style={{ marginBottom: '16px' }}>
+            <strong style={{ color: '#555', display: 'block', marginBottom: '8px' }}>Documents:</strong>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
               {el.documents.map((doc, docIdx) => (
-                <div key={docIdx} style={{ display: 'flex', alignItems: 'center' }}>
+                <div key={docIdx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <input
                     type="text"
                     placeholder="template_id"
                     value={doc.template_id}
                     onChange={e => handleDocumentChange(elIdx, docIdx, e.target.value)}
-                    style={{ width: 120, padding: 4, borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                    style={{ flex: '1', maxWidth: '300px', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
                   />
-                  <button onClick={() => removeDocument(elIdx, docIdx)} disabled={el.documents.length === 1} style={{ marginLeft: 4, padding: '10px 16px', borderRadius: 6, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}>Remove</button>
+                  <button 
+                    onClick={() => removeDocument(elIdx, docIdx)} 
+                    disabled={el.documents.length === 1} 
+                    style={{ padding: '8px 12px', borderRadius: 4, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: el.documents.length === 1 ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: el.documents.length === 1 ? 0.6 : 1 }}
+                  >
+                    Remove
+                  </button>
                 </div>
               ))}
-              <button onClick={() => addDocument(elIdx)} style={{ padding: '10px 16px', borderRadius: 6, backgroundColor: '#5cb85c', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}>Add Document</button>
+              <button 
+                onClick={() => addDocument(elIdx)} 
+                style={{ alignSelf: 'flex-start', padding: '8px 12px', borderRadius: 4, backgroundColor: '#5cb85c', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}
+              >
+                Add Document
+              </button>
             </div>
           </div>
-          <div style={{ marginTop: 8 }}>
-            <strong style={{ color: '#555' }}>Authenticators:</strong>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 4, maxWidth: '100%' }}>
+          
+          {/* Authenticators section */}
+          <div style={{ marginBottom: '16px' }}>
+            <strong style={{ color: '#555', display: 'block', marginBottom: '8px' }}>Authenticators:</strong>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '8px' }}>
               {el.authenticators.map((auth, authIdx) => (
-                <div key={authIdx} style={{ border: '1px solid #eee', padding: 8, marginBottom: 4, borderRadius: 4, boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', backgroundColor: '#f9f9f9' }}>
-                  <div>
-                    <label style={{ fontWeight: 'bold', color: '#555' }}>Type: </label>
-                    <select
-                      value={auth.type}
-                      onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'type', e.target.value)}
-                      style={{ padding: 4, borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
-                    >
-                      <option value="">Select type</option>
-                      <option value="admin">admin</option>
-                      <option value="root_admin">root_admin</option>
-                    </select>
+                <div key={authIdx} style={{ border: '1px solid #eee', padding: '12px', borderRadius: 4, boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', backgroundColor: '#f9f9f9' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+                    <div>
+                      <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Type: </label>
+                      <select
+                        value={auth.type}
+                        onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'type', e.target.value)}
+                        style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                      >
+                        <option value="">Select type</option>
+                        <option value="admin">admin</option>
+                        <option value="root_admin">root_admin</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>User ID: </label>
+                      <input
+                        type="text"
+                        placeholder="user_id"
+                        value={auth.user_id}
+                        onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'user_id', e.target.value)}
+                        style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Root Index: </label>
+                      <input
+                        type="number"
+                        placeholder="root_index"
+                        value={auth.root_index}
+                        onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'root_index', e.target.value)}
+                        style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Level: </label>
+                      <select
+                        value={auth.level}
+                        onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'level', Number(e.target.value))}
+                        style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                      >
+                        {[1, 2, 3, 4, 5].map(lvl => (
+                          <option key={lvl} value={lvl}>{lvl}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                  <div>
-                    <label style={{ fontWeight: 'bold', color: '#555' }}>User ID: </label>
-                    <input
-                      type="text"
-                      placeholder="user_id"
-                      value={auth.user_id}
-                      onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'user_id', e.target.value)}
-                      style={{ width: 120, padding: 4, borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontWeight: 'bold', color: '#555' }}>Level: </label>
-                    <select
-                      value={auth.level}
-                      onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'level', Number(e.target.value))}
-                      style={{ width: 60, height: 28, fontSize: 13, padding: 4, borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
-                    >
-                      {[1, 2, 3, 4, 5].map(lvl => (
-                        <option key={lvl} value={lvl}>{lvl}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 13, fontWeight: 'bold', color: '#555' }}>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label style={{ fontSize: 14, fontWeight: 'bold', color: '#555' }}>
                       <input
                         type="checkbox"
                         checked={auth.is_power_approver}
                         onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'is_power_approver', e.target.checked)}
-                        style={{ width: 16, height: 16 }}
+                        style={{ width: 16, height: 16, marginRight: '6px' }}
                       />
                       Is Power Approver
                     </label>
+                    
+                    <button 
+                      onClick={() => removeAuthenticator(elIdx, authIdx)} 
+                      disabled={el.authenticators.length === 1} 
+                      style={{ padding: '8px 12px', borderRadius: 4, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: el.authenticators.length === 1 ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: el.authenticators.length === 1 ? 0.6 : 1 }}
+                    >
+                      Remove
+                    </button>
                   </div>
-                  <button onClick={() => removeAuthenticator(elIdx, authIdx)} disabled={el.authenticators.length === 1} style={{ padding: '10px 16px', borderRadius: 6, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}>Remove</button>
                 </div>
               ))}
-              <button onClick={() => addAuthenticator(elIdx)} style={{ padding: '10px 16px', borderRadius: 6, backgroundColor: '#5cb85c', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}>Add Authenticator</button>
+              <button 
+                onClick={() => addAuthenticator(elIdx)} 
+                style={{ alignSelf: 'flex-start', padding: '8px 12px', borderRadius: 4, backgroundColor: '#5cb85c', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}
+              >
+                Add Authenticator
+              </button>
             </div>
           </div>
-          <button onClick={() => removeElement(elIdx)} disabled={elements.length === 1} style={{ marginTop: 8, padding: '10px 16px', borderRadius: 6, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}>Remove Element</button>
+          
+          <button 
+            onClick={() => removeElement(elIdx)} 
+            disabled={elements.length === 1} 
+            style={{ marginTop: 8, padding: '8px 12px', borderRadius: 4, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: elements.length === 1 ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: elements.length === 1 ? 0.6 : 1 }}
+          >
+            Remove Element
+          </button>
         </div>
       ))}
-      <button onClick={addElement} style={{ marginBottom: 16, padding: '12px 20px', borderRadius: 6, backgroundColor: '#0275d8', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}>Add Top-level Element</button>
-      <div>
-        <button onClick={handleGenerate} style={{ padding: '12px 20px', borderRadius: 6, backgroundColor: '#0275d8', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}>Generate JSON</button>
+      
+      <button 
+        onClick={addElement} 
+        style={{ marginBottom: 16, padding: '10px 16px', borderRadius: 4, backgroundColor: '#0275d8', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+      >
+        Add Top-level Element
+      </button>
+      
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+        <button 
+          onClick={handleGenerate} 
+          style={{ padding: '10px 16px', borderRadius: 4, backgroundColor: '#0275d8', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+        >
+          Generate JSON
+        </button>
+        
         {jsonOutput && (
           <>
-            <button onClick={copyToClipboard} style={{ marginLeft: 8, padding: '12px 20px', borderRadius: 6, backgroundColor: '#5bc0de', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}>Copy Generated JSON</button>
-            <button onClick={minifyJson} style={{ marginLeft: 8, padding: '12px 20px', borderRadius: 6, backgroundColor: '#f0ad4e', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}>Minify JSON</button>
-            <button onClick={formatJson} style={{ marginLeft: 8, padding: '12px 20px', borderRadius: 6, backgroundColor: '#5bc0de', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}>Format JSON</button>
+            <button 
+              onClick={copyToClipboard} 
+              style={{ padding: '10px 16px', borderRadius: 4, backgroundColor: '#5bc0de', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+            >
+              Copy Generated JSON
+            </button>
+            <button 
+              onClick={minifyJson} 
+              style={{ padding: '10px 16px', borderRadius: 4, backgroundColor: '#f0ad4e', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+            >
+              Minify JSON
+            </button>
+            <button 
+              onClick={formatJson} 
+              style={{ padding: '10px 16px', borderRadius: 4, backgroundColor: '#5bc0de', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+            >
+              Format JSON
+            </button>
           </>
         )}
       </div>
+      
       {notification && (
         <div style={{ marginTop: 16, color: '#5cb85c', fontWeight: 'bold' }}>
           {notification}
         </div>
       )}
+      
       {jsonOutput && (
         <div style={{ marginTop: 16 }}>
-          <label><strong>Generated JSON:</strong></label>
-          <pre style={{ background: '#f7f7f7', padding: 12, borderRadius: 4, boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', color: '#333' }}>{jsonOutput}</pre>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Generated JSON:</label>
+          <pre style={{ background: '#f7f7f7', padding: 16, borderRadius: 4, boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', color: '#333', overflowX: 'auto' }}>{jsonOutput}</pre>
         </div>
       )}
     </div>
