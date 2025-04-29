@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Hashids from 'hashids';
 
 function emptyElement() {
   return {
@@ -19,6 +20,40 @@ function JsonStructureBuilder() {
   const [elements, setElements] = useState([emptyElement()]);
   const [jsonOutput, setJsonOutput] = useState('');
   const [notification, setNotification] = useState('');
+  const [csvData, setCsvData] = useState([]);
+  const [saltKey, setSaltKey] = useState('');
+
+  const handleCsvUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const lines = e.target.result.split('\n');
+        const data = lines.map(line => {
+          const [id, email, name] = line.split(',');
+          const hashids = new Hashids(saltKey, 12);
+          const hashed = hashids.encode(parseInt(id, 10));
+          return { id, hashed, email, name };
+        });
+        setCsvData(data);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  // Function to rehash IDs with new salt key
+  const rehashIds = () => {
+    if (csvData.length > 0) {
+      const hashids = new Hashids(saltKey, 12);
+      const updatedData = csvData.map(row => ({
+        ...row,
+        hashed: hashids.encode(parseInt(row.id, 10))
+      }));
+      setCsvData(updatedData);
+      setNotification('Data rehashed with new salt key!');
+      setTimeout(() => setNotification(''), 2000);
+    }
+  };
 
   // Handlers for form.id
   const handleFormIdChange = (idx, value) => {
@@ -132,155 +167,220 @@ function JsonStructureBuilder() {
       <Link to="/" className="back-to-home" style={{ textDecoration: 'none', color: '#5A5A5A', marginBottom: 16 }}>Back to Home</Link>
       <h2 style={{ color: '#5A5A5A' }}>承認フロー作成</h2>
       <p style={{ fontSize: '16px', marginBottom: 24, color: '#666' }}>UIで承認フロー作成</p>
-      {elements.map((el, elIdx) => (
-        <div key={elIdx} style={{ border: '1px solid #ddd', padding: 16, marginBottom: 16, borderRadius: 8, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.05)', backgroundColor: '#f9f9f9' }}>
-          <h3 style={{ color: '#777', marginBottom: '12px' }}>Step {elIdx + 1}</h3>
-          
-          {/* Form ID section */}
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '6px' }}>Form ID: </label>
-            <input
-              type="text"
-              value={el.form.id}
-              onChange={e => handleFormIdChange(elIdx, e.target.value)}
-              style={{ width: '100%', maxWidth: '300px', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
-            />
-          </div>
-          
-          {/* Documents section */}
-          <div style={{ marginBottom: '16px' }}>
-            <strong style={{ color: '#555', display: 'block', marginBottom: '8px' }}>Documents:</strong>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
-              {el.documents.map((doc, docIdx) => (
-                <div key={docIdx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <input
-                    type="text"
-                    placeholder="template_id"
-                    value={doc.template_id}
-                    onChange={e => handleDocumentChange(elIdx, docIdx, e.target.value)}
-                    style={{ flex: '1', maxWidth: '300px', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
-                  />
-                  <button 
-                    onClick={() => removeDocument(elIdx, docIdx)} 
-                    disabled={el.documents.length === 1} 
-                    style={{ padding: '8px 12px', borderRadius: 4, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: el.documents.length === 1 ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: el.documents.length === 1 ? 0.6 : 1 }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button 
-                onClick={() => addDocument(elIdx)} 
-                style={{ alignSelf: 'flex-start', padding: '8px 12px', borderRadius: 4, backgroundColor: '#5cb85c', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}
-              >
-                Add Document
-              </button>
-            </div>
-          </div>
-          
-          {/* Authenticators section */}
-          <div style={{ marginBottom: '16px' }}>
-            <strong style={{ color: '#555', display: 'block', marginBottom: '8px' }}>Authenticators:</strong>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '8px' }}>
-              {el.authenticators.map((auth, authIdx) => (
-                <div key={authIdx} style={{ border: '1px solid #eee', padding: '12px', borderRadius: 4, boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', backgroundColor: '#f9f9f9' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
-                    <div>
-                      <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Type: </label>
-                      <select
-                        value={auth.type}
-                        onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'type', e.target.value)}
-                        style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
-                      >
-                        <option value="">Select type</option>
-                        <option value="admin">admin</option>
-                        <option value="root_admin">root_admin</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>User ID: </label>
+      
+      <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+        {/* Left side: Steps */}
+        <div style={{ flex: 2, minWidth: 0 }}>
+          {elements.map((el, elIdx) => (
+            <div key={elIdx} style={{ border: '1px solid #ddd', padding: 16, marginBottom: 16, borderRadius: 8, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.05)', backgroundColor: '#f9f9f9' }}>
+              <h3 style={{ color: '#777', marginBottom: '12px' }}>Step {elIdx + 1}</h3>
+              {/* Form ID section */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '6px' }}>Form ID: </label>
+                <input
+                  type="text"
+                  value={el.form.id}
+                  onChange={e => handleFormIdChange(elIdx, e.target.value)}
+                  style={{ width: '100%', maxWidth: '300px', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                />
+              </div>
+              {/* Documents section */}
+              <div style={{ marginBottom: '16px' }}>
+                <strong style={{ color: '#555', display: 'block', marginBottom: '8px' }}>Documents:</strong>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
+                  {el.documents.map((doc, docIdx) => (
+                    <div key={docIdx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <input
                         type="text"
-                        placeholder="user_id"
-                        value={auth.user_id}
-                        onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'user_id', e.target.value)}
-                        style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                        placeholder="template_id"
+                        value={doc.template_id}
+                        onChange={e => handleDocumentChange(elIdx, docIdx, e.target.value)}
+                        style={{ flex: '1', maxWidth: '300px', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
                       />
-                    </div>
-                    
-                    <div>
-                      <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Root Index: </label>
-                      <input
-                        type="number"
-                        placeholder="root_index"
-                        value={auth.root_index}
-                        onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'root_index', e.target.value)}
-                        style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Level: </label>
-                      <select
-                        value={auth.level}
-                        onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'level', Number(e.target.value))}
-                        style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                      <button 
+                        onClick={() => removeDocument(elIdx, docIdx)} 
+                        disabled={el.documents.length === 1} 
+                        style={{ padding: '8px 12px', borderRadius: 4, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: el.documents.length === 1 ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: el.documents.length === 1 ? 0.6 : 1 }}
                       >
-                        {[1, 2, 3, 4, 5].map(lvl => (
-                          <option key={lvl} value={lvl}>{lvl}</option>
-                        ))}
-                      </select>
+                        Remove
+                      </button>
                     </div>
-                  </div>
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <label style={{ fontSize: 14, fontWeight: 'bold', color: '#555' }}>
-                      <input
-                        type="checkbox"
-                        checked={auth.is_power_approver}
-                        onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'is_power_approver', e.target.checked)}
-                        style={{ width: 16, height: 16, marginRight: '6px' }}
-                      />
-                      Is Power Approver
-                    </label>
-                    
-                    <button 
-                      onClick={() => removeAuthenticator(elIdx, authIdx)} 
-                      disabled={el.authenticators.length === 1} 
-                      style={{ padding: '8px 12px', borderRadius: 4, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: el.authenticators.length === 1 ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: el.authenticators.length === 1 ? 0.6 : 1 }}
-                    >
-                      Remove
-                    </button>
-                  </div>
+                  ))}
+                  <button 
+                    onClick={() => addDocument(elIdx)} 
+                    style={{ alignSelf: 'flex-start', padding: '8px 12px', borderRadius: 4, backgroundColor: '#5cb85c', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}
+                  >
+                    Add Document
+                  </button>
                 </div>
-              ))}
+              </div>
+              {/* Authenticators section */}
+              <div style={{ marginBottom: '16px' }}>
+                <strong style={{ color: '#555', display: 'block', marginBottom: '8px' }}>Authenticators:</strong>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '8px' }}>
+                  {el.authenticators.map((auth, authIdx) => (
+                    <div key={authIdx} style={{ border: '1px solid #eee', padding: '12px', borderRadius: 4, boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)', backgroundColor: '#f9f9f9' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+                        <div>
+                          <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Type: </label>
+                          <select
+                            value={auth.type}
+                            onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'type', e.target.value)}
+                            style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                          >
+                            <option value="">Select type</option>
+                            <option value="admin">admin</option>
+                            <option value="root_admin">root_admin</option>
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>User ID: </label>
+                          <input
+                            type="text"
+                            placeholder="user_id"
+                            value={auth.user_id}
+                            onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'user_id', e.target.value)}
+                            style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                          />
+                        </div>
+                        
+                        <div>
+                          <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Root Index: </label>
+                          <input
+                            type="number"
+                            placeholder="root_index"
+                            value={auth.root_index}
+                            onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'root_index', e.target.value)}
+                            style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                          />
+                        </div>
+                        
+                        <div>
+                          <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Level: </label>
+                          <select
+                            value={auth.level}
+                            onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'level', Number(e.target.value))}
+                            style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                          >
+                            {[1, 2, 3, 4, 5].map(lvl => (
+                              <option key={lvl} value={lvl}>{lvl}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label style={{ fontSize: 14, fontWeight: 'bold', color: '#555' }}>
+                          <input
+                            type="checkbox"
+                            checked={auth.is_power_approver}
+                            onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'is_power_approver', e.target.checked)}
+                            style={{ width: 16, height: 16, marginRight: '6px' }}
+                          />
+                          Is Power Approver
+                        </label>
+                        
+                        <button 
+                          onClick={() => removeAuthenticator(elIdx, authIdx)} 
+                          disabled={el.authenticators.length === 1} 
+                          style={{ padding: '8px 12px', borderRadius: 4, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: el.authenticators.length === 1 ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: el.authenticators.length === 1 ? 0.6 : 1 }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => addAuthenticator(elIdx)} 
+                    style={{ alignSelf: 'flex-start', padding: '8px 12px', borderRadius: 4, backgroundColor: '#5cb85c', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}
+                  >
+                    Add Authenticator
+                  </button>
+                </div>
+              </div>
+              
               <button 
-                onClick={() => addAuthenticator(elIdx)} 
-                style={{ alignSelf: 'flex-start', padding: '8px 12px', borderRadius: 4, backgroundColor: '#5cb85c', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}
+                onClick={() => removeElement(elIdx)} 
+                disabled={elements.length === 1} 
+                style={{ marginTop: 8, padding: '8px 12px', borderRadius: 4, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: elements.length === 1 ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: elements.length === 1 ? 0.6 : 1 }}
               >
-                Add Authenticator
+                Remove Element
               </button>
             </div>
-          </div>
-          
+          ))}
           <button 
-            onClick={() => removeElement(elIdx)} 
-            disabled={elements.length === 1} 
-            style={{ marginTop: 8, padding: '8px 12px', borderRadius: 4, backgroundColor: '#d9534f', color: '#fff', border: 'none', cursor: elements.length === 1 ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: elements.length === 1 ? 0.6 : 1 }}
+            onClick={addElement} 
+            style={{ marginBottom: 16, padding: '10px 16px', borderRadius: 4, backgroundColor: '#0275d8', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}
           >
-            Remove Element
+            Add Top-level Element
           </button>
         </div>
-      ))}
-      
-      <button 
-        onClick={addElement} 
-        style={{ marginBottom: 16, padding: '10px 16px', borderRadius: 4, backgroundColor: '#0275d8', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '16px' }}
-      >
-        Add Top-level Element
-      </button>
-      
+        {/* Right side: Hash Salt Key and CSV in a card box */}
+        <div style={{
+          flex: 1,
+          minWidth: 280,
+          border: '1px solid #ddd',
+          borderRadius: 8,
+          boxShadow: '0 4px 8px rgba(0,0,0,0.07)',
+          backgroundColor: '#f9f9f9',
+          padding: 24,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px'
+        }}>
+          {/* Salt Key Input Section */}
+          <div>
+            <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '6px' }}>Hash Salt Key:</label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input
+                type="text"
+                value={saltKey}
+                onChange={(e) => setSaltKey(e.target.value)}
+                style={{ flex: '1', maxWidth: '500px', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+              />
+              {csvData.length > 0 && (
+                <button
+                  onClick={rehashIds}
+                  style={{ padding: '8px 12px', borderRadius: 4, backgroundColor: '#5bc0de', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px' }}
+                >
+                  Rehash Data
+                </button>
+              )}
+            </div>
+          </div>
+          {/* CSV Upload Section */}
+          <div>
+            <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '6px' }}>Upload CSV:</label>
+            <input type="file" accept=".csv" onChange={handleCsvUpload} style={{ padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }} />
+          </div>
+          {/* Display CSV Data */}
+          {csvData.length > 0 && (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '0' }}>
+                <thead>
+                  <tr>
+                    <th style={{ border: '1px solid #ddd', padding: '8px' }}>ID</th>
+                    <th style={{ border: '1px solid #ddd', padding: '8px' }}>Hashed</th>
+                    <th style={{ border: '1px solid #ddd', padding: '8px' }}>Email</th>
+                    <th style={{ border: '1px solid #ddd', padding: '8px' }}>Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {csvData.map((row, index) => (
+                    <tr key={index}>
+                      <td style={{ border: '1px solid #ddd', padding: '8px' }}>{row.id}</td>
+                      <td style={{ border: '1px solid #ddd', padding: '8px' }}>{row.hashed}</td>
+                      <td style={{ border: '1px solid #ddd', padding: '8px' }}>{row.email}</td>
+                      <td style={{ border: '1px solid #ddd', padding: '8px' }}>{row.name}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
         <button 
           onClick={handleGenerate} 
