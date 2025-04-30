@@ -11,7 +11,9 @@ function emptyElement() {
       user_id: '',
       root_index: '',
       level: 1,
-      is_power_approver: false
+      is_power_approver: false,
+      allow_closest_admin: false,
+      include_all_admin: false
     }]
   };
 }
@@ -92,7 +94,9 @@ function JsonStructureBuilder() {
       user_id: '',
       root_index: '',
       level: 1,
-      is_power_approver: false
+      is_power_approver: false,
+      allow_closest_admin: false,
+      include_all_admin: false
     });
     setElements(updated);
   };
@@ -245,16 +249,24 @@ function JsonStructureBuilder() {
                           />
                         </div>
                         
-                        <div>
-                          <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Root Index: </label>
-                          <input
-                            type="number"
-                            placeholder="root_index"
-                            value={auth.root_index}
-                            onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'root_index', e.target.value)}
-                            style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
-                          />
-                        </div>
+                        {auth.type === 'root_admin' && (
+                          <div>
+                            <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>
+                              Root Index: <span style={{ color: 'red' }}>*</span>
+                            </label>
+                            <input
+                              type="number"
+                              placeholder="root_index"
+                              value={auth.root_index}
+                              required
+                              onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'root_index', e.target.value)}
+                              style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff', borderColor: !auth.root_index ? 'red' : '#ccc' }}
+                            />
+                            {!auth.root_index && (
+                              <span style={{ color: 'red', fontSize: 12 }}>Required for root_admin</span>
+                            )}
+                          </div>
+                        )}
                         
                         <div>
                           <label style={{ fontWeight: 'bold', color: '#555', display: 'block', marginBottom: '4px' }}>Level: </label>
@@ -270,7 +282,7 @@ function JsonStructureBuilder() {
                         </div>
                       </div>
                       
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                         <label style={{ fontSize: 14, fontWeight: 'bold', color: '#555' }}>
                           <input
                             type="checkbox"
@@ -280,7 +292,24 @@ function JsonStructureBuilder() {
                           />
                           Is Power Approver
                         </label>
-                        
+                        <label style={{ fontSize: 14, fontWeight: 'bold', color: '#555' }}>
+                          <input
+                            type="checkbox"
+                            checked={auth.allow_closest_admin || false}
+                            onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'allow_closest_admin', e.target.checked)}
+                            style={{ width: 16, height: 16, marginRight: '6px' }}
+                          />
+                          Allow Closest Admin
+                        </label>
+                        <label style={{ fontSize: 14, fontWeight: 'bold', color: '#555' }}>
+                          <input
+                            type="checkbox"
+                            checked={auth.include_all_admin || false}
+                            onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'include_all_admin', e.target.checked)}
+                            style={{ width: 16, height: 16, marginRight: '6px' }}
+                          />
+                          Include All Admin
+                        </label>
                         <button 
                           onClick={() => removeAuthenticator(elIdx, authIdx)} 
                           disabled={el.authenticators.length === 1} 
