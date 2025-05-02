@@ -231,6 +231,7 @@ function JsonStructureBuilder() {
                             value={auth.type}
                             onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'type', e.target.value)}
                             style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                            disabled={!!auth.user_id}
                           >
                             <option value="">Select type</option>
                             <option value="admin">admin</option>
@@ -246,6 +247,7 @@ function JsonStructureBuilder() {
                             value={auth.user_id}
                             onChange={e => handleAuthenticatorChange(elIdx, authIdx, 'user_id', e.target.value)}
                             style={{ width: '100%', padding: '8px', borderRadius: 4, border: '1px solid #ccc', backgroundColor: '#fff' }}
+                            disabled={!!auth.type}
                           />
                         </div>
                         

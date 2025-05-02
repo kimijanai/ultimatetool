@@ -5,6 +5,11 @@ import './Home.css';
 function Home() {
   const tools = [
     {
+      id: 'json-structure-builder',
+      title: '承認フロー作成',
+      description: 'UIで承認フロー作成'
+    },
+    {
       id: 'json-formatter',
       title: 'JSON Formatter & Visual Editor',
       description: 'Simple JSON editor'
@@ -43,11 +48,6 @@ function Home() {
       id: 'sql-formatter',
       title: 'SQL Query Validator & Formatter',
       description: 'Format, minify, and validate your SQL queries with ease.'
-    },
-    {
-      id: 'json-structure-builder',
-      title: '承認フロー作成',
-      description: 'UIで承認フロー作成'
     }
   ];
 
