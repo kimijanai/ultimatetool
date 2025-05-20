@@ -85,13 +85,13 @@ const TimeGenerator = () => {
           readOnly
           style={{ flex: 1, padding: 8, borderRadius: 4, border: '1px solid #ccc', background: '#f9f9f9' }}
         />
+        <button onClick={handleGenerate} style={{ padding: '8px 16px', borderRadius: 4, background: '#5cb85c', color: '#fff', border: 'none', cursor: 'pointer' }}>
+          Generate
+        </button>
         <button onClick={handleCopy} style={{ padding: '8px 12px', borderRadius: 4, background: '#5bc0de', color: '#fff', border: 'none', cursor: 'pointer' }}>
           Copy
         </button>
       </div>
-      <button onClick={handleGenerate} style={{ padding: '8px 16px', borderRadius: 4, background: '#5cb85c', color: '#fff', border: 'none', cursor: 'pointer' }}>
-        Generate
-      </button>
     </div>
   );
 };
