@@ -13,6 +13,7 @@ import HalfWidthFullWidthConverter from './components/HalfWidthFullWidthConverte
 import TextDiffChecker from './components/TextDiffChecker';
 import SecurePasswordGenerator from './components/SecurePasswordGenerator';
 import SQLValidator from './components/SQLValidator';
+import TimeGenerator from './components/TimeGenerator';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
               <Link to="/text-diff-checker" className="sidebar-link">Text Diff Checker</Link>
               <Link to="/secure-password-generator" className="sidebar-link">Secure Password Generator</Link>
               <Link to="/sql-formatter" className="sidebar-link">SQL Formatter</Link>
+              <Link to="/time-generator" className="sidebar-link">TIME Generator</Link>
             </div>
           </div>
         </nav>
@@ -47,6 +49,7 @@ function App() {
             <Route path="/text-diff-checker" element={<TextDiffChecker />} />
             <Route path="/secure-password-generator" element={<SecurePasswordGenerator />} />
             <Route path="/sql-formatter" element={<SQLValidator />} />
+            <Route path="/time-generator" element={<TimeGenerator />} />
           </Routes>
         </div>
       </div>

@@ -48,6 +48,11 @@ function Home() {
       id: 'sql-formatter',
       title: 'SQL Query Validator & Formatter',
       description: 'Format, minify, and validate your SQL queries with ease.'
+    },
+    {
+      id: 'Time generator',
+      title: 'Quick generate time',
+      description: ' Quickly generate timestamps, dates, and times with ease.'
     }
   ];
 
