@@ -50,7 +50,7 @@ function Home() {
       description: 'Format, minify, and validate your SQL queries with ease.'
     },
     {
-      id: 'Time generator',
+      id: 'time-generator',
       title: 'Quick generate time',
       description: ' Quickly generate timestamps, dates, and times with ease.'
     }
